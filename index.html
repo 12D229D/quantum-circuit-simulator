@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Circuit Simulator 2D/3D — Simulador de Computación Cuántica</title>
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Encabezado Principal -->
+        <header class="app-header">
+            <div class="brand-section">
+                <div class="quantum-logo-icon">Ψ</div>
+                <div>
+                    <h1>QUANTUM <span class="gradient-text">CIRCUIT SIMULATOR</span></h1>
+                    <div class="app-subtitle">SIMULADOR CUÁNTICO MATRICIAL 2D/3D & ESFERA DE BLOCH</div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas & Presets -->
+            <nav class="header-actions" aria-label="Menú de herramientas rápidas">
+                <div class="control-group">
+                    <label for="presetSelect">Algoritmos:</label>
+                    <select id="presetSelect" class="select-input">
+                        <option value="">-- Cargar Algoritmo Cuántico --</option>
+                        <option value="bellStatePhiPlus">Estado de Bell |Φ+⟩ (Entrelazamiento)</option>
+                        <option value="bellStatePsiMinus">Estado de Bell |Ψ-⟩ (Singlete)</option>
+                        <option value="ghzState">Estado GHZ (3 Qubits)</option>
+                        <option value="quantumTeleportation">Teletransportación Cuántica</option>
+                        <option value="deutschAlgorithm">Algoritmo de Deutsch</option>
+                        <option value="qrngUniform">Generador Aleatorio (QRNG 3Q)</option>
+                        <option value="halfAdder">Sumador Cuántico (Half-Adder)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="qubitCountSelect">Qubits:</label>
+                    <select id="qubitCountSelect" class="select-input select-small">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="stepCountSelect">Pasos:</label>
+                    <select id="stepCountSelect" class="select-input select-small">
+                        <option value="6">6</option>
+                        <option value="8" selected>8</option>
+                        <option value="12">12</option>
+                        <option value="16">16</option>
+                    </select>
+                </div>
+
+                <button id="btnOpenMeasure" class="btn btn-secondary">🎲 Medición</button>
+                <button id="btnOpenExport" class="btn btn-primary">⚡ Exportar Código</button>
+                <button id="btnSaveCircuit" class="btn btn-secondary" title="Guardar circuito en la base de datos local">💾 Guardar</button>
+                <button id="btnExportDB" class="btn btn-secondary" title="Descargar dump .sql compatible con SQLite3">🗄️ Exportar DB SQL</button>
+                <button id="btnClearCircuit" class="btn btn-danger">🗑 Limpiar</button>
+            </nav>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="app-main-grid">
+            <!-- Columna Izquierda: Paleta de Puertas y Diseñador de Circuito -->
+            <section class="circuit-section card-panel">
+                <div class="section-header">
+                    <h2>Diseñador de Circuito</h2>
+                    <div class="editor-hint" id="editorPrompt">Selecciona una puerta y haz clic en la celda del circuito.</div>
+                </div>
+
+                <!-- Paleta de Puertas Cuánticas -->
+                <div class="gates-palette-container">
+                    <div class="palette-group">
+                        <span class="palette-label">Puertas Simples:</span>
+                        <button class="gate-tool active" data-gate="H" title="Hadamard: Superposición (|0> -> |+>)">H</button>
+                        <button class="gate-tool" data-gate="X" title="Pauli-X: Bit-Flip / NOT (|0> <-> |1>)">X</button>
+                        <button class="gate-tool" data-gate="Y" title="Pauli-Y: Bit + Phase Flip">Y</button>
+                        <button class="gate-tool" data-gate="Z" title="Pauli-Z: Phase Flip (|1> -> -|1>)">Z</button>
+                        <button class="gate-tool" data-gate="S" title="Puerta S: Fase π/2">S</button>
+                        <button class="gate-tool" data-gate="SDG" title="Puerta S†: Fase -π/2">S†</button>
+                        <button class="gate-tool" data-gate="T" title="Puerta T: Fase π/4">T</button>
+                        <button class="gate-tool" data-gate="TDG" title="Puerta T†: Fase -π/4">T†</button>
+                        <button class="gate-tool" data-gate="RX" title="Rotación en X: Rx(θ)">Rx</button>
+                        <button class="gate-tool" data-gate="RY" title="Rotación en Y: Ry(θ)">Ry</button>
+                        <button class="gate-tool" data-gate="RZ" title="Rotación en Z: Rz(θ)">Rz</button>
+                    </div>
+                    <div class="palette-group">
+                        <span class="palette-label">Entrelazamiento & Multi-Qubit:</span>
+                        <button class="gate-tool gate-multi" data-gate="CNOT" title="Controlled-NOT: Control + Target">CNOT</button>
+                        <button class="gate-tool gate-multi" data-gate="CZ" title="Controlled-Z">CZ</button>
+                        <button class="gate-tool gate-multi" data-gate="SWAP" title="SWAP: Intercambio de estados">SWAP</button>
+                        <button class="gate-tool gate-multi" data-gate="TOFFOLI" title="Toffoli: CCNOT (2 Controles + 1 Target)">Toffoli</button>
+                        <button class="gate-tool gate-delete" data-gate="DELETE" title="Herramienta de borrado">Borrar ✕</button>
+                    </div>
+                </div>
+
+                <!-- Cuadrícula del Circuito -->
+                <div class="circuit-grid-wrapper">
+                    <div class="circuit-grid" id="circuitGrid">
+                        <!-- Generado dinámicamente por app.js -->
+                    </div>
+                </div>
+
+                <!-- Barra de Reproducción y Pasos Cuánticos -->
+                <div class="playback-toolbar">
+                    <div class="step-controls">
+                        <button id="btnStepBack" class="btn btn-icon" title="Paso Anterior">⏮</button>
+                        <button id="btnPlay" class="btn btn-primary btn-sm">▶ Reproducir</button>
+                        <button id="btnStepForward" class="btn btn-icon" title="Paso Siguiente">⏭</button>
+                        <button id="btnResetStep" class="btn btn-secondary btn-sm">Estado Final</button>
+                    </div>
+                    <div class="state-notation-badge">
+                        <span class="badge-label">Estado Dirac:</span>
+                        <span id="diracState" class="dirac-code">|ψ⟩ = |000⟩</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Derecha: Esfera de Bloch 3D y Métricas de Pureza -->
+            <section class="bloch-section card-panel">
+                <div class="section-header">
+                    <h2>Esfera de Bloch 3D</h2>
+                    <div class="bloch-selector">
+                        <label for="blochQubitSelect">Qubit:</label>
+                        <select id="blochQubitSelect" class="select-input select-small"></select>
+                    </div>
+                </div>
+
+                <div class="bloch-canvas-container">
+                    <canvas id="blochCanvas" width="360" height="340"></canvas>
+                </div>
+
+                <div class="bloch-legend">
+                    <div class="legend-item"><span class="dot dot-yellow"></span> Polo Z: |0⟩ (Norte) / |1⟩ (Sur)</div>
+                    <div class="legend-item"><span class="dot dot-cyan"></span> Eje X: |+⟩ / |-⟩ (Superposición)</div>
+                    <div class="legend-item"><span class="dot dot-pink"></span> Eje Y: |i⟩ / |-i⟩ (Fase Compleja)</div>
+                    <div class="legend-item"><span class="dot dot-green"></span> Vector |r|: Estado Puro (=1.0) / Mixto/Entrelazado (<1.0)</div>
+                </div>
+            </section>
+
+            <!-- Fila Inferior: Distribución de Probabilidades de Amplitud -->
+            <section class="probabilities-section card-panel">
+                <div class="section-header">
+                    <h2>Probabilidades de Estado Cuántico (Amplitudes |cₖ|²)</h2>
+                    <span class="info-tag">Base Computacional de 2<sup>N</sup> Estados</span>
+                </div>
+                <div class="prob-bars-grid" id="probBarsContainer">
+                    <!-- Generado dinámicamente -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal de Medición Cuántica -->
+        <div id="measureModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="measureTitle">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="measureTitle">🎲 Simulación de Medición (Colapso de Onda)</h3>
+                    <button id="btnCloseMeasure" class="btn-close" aria-label="Cerrar modal">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Ejecuta $N$ experimentos cuánticos independientes (*shots*). La función de onda colapsa probabilísticamente según la regla de Born ($P(x) = |\langle x|\psi\rangle|^2$).
+                    </p>
+                    <div class="measure-controls-row">
+                        <label for="measureShotsSelect">Número de Disparos (Shots):</label>
+                        <select id="measureShotsSelect" class="select-input">
+                            <option value="100">100 disparos</option>
+                            <option value="1024" selected>1,024 disparos (Estándar Qiskit)</option>
+                            <option value="4096">4,096 disparos (Alta Precisión)</option>
+                            <option value="8192">8,192 disparos</option>
+                        </select>
+                        <button id="btnRunMeasure" class="btn btn-primary">Ejecutar Muestreo</button>
+                    </div>
+                    <div class="measure-chart-container" id="measureChartContainer">
+                        <!-- Histogram rows -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Exportación de Código -->
+        <div id="exportModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+            <div class="modal-card modal-large">
+                <div class="modal-header">
+                    <h3 id="exportTitle">⚡ Exportar Circuito Cuántico</h3>
+                    <button id="btnCloseExport" class="btn-close" aria-label="Cerrar modal">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-tabs">
+                        <button id="tabQasm" class="tab-btn active">OpenQASM 2.0</button>
+                        <button id="tabQiskit" class="tab-btn">Qiskit (Python)</button>
+                        <button id="tabJson" class="tab-btn">JSON</button>
+                    </div>
+                    <textarea id="exportCodeArea" class="code-textarea" readonly></textarea>
+                    <div class="modal-footer">
+                        <button id="btnCopyCode" class="btn btn-primary">📋 Copiar al Portapapeles</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast de Notificaciones -->
+        <div id="toastNotification" class="toast-popup"></div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© 2026 Quantum Circuit Simulator • Portfolio Monorrepo Codex • Entorno de Álgebra Matricial & Visualización 3D</p>
+        </footer>
+    </div>
+
+    <!-- Scripts del Motor Cuántico -->
+    <script src="js/complex.js"></script>
+    <script src="js/quantum-matrix.js"></script>
+    <script src="js/quantum-circuit.js"></script>
+    <script src="js/bloch-sphere.js"></script>
+    <script src="js/presets.js"></script>
+    <script src="js/exporter.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
